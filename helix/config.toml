@@ -1,0 +1,59 @@
+theme = "kanabox_default"
+
+[editor]
+# Show currently open buffers, only when more than one exists.
+bufferline = "multiple"
+# Highlight all lines with a cursor
+cursorline = true
+# Use relative line numbers
+line-number = "relative"
+# Force the theme to show colors
+true-color = true
+color-modes = true
+completion-trigger-len = 1
+auto-pairs = true
+
+[editor.soft-wrap]
+enable = true
+
+[editor.whitespace.render]
+space = "all"
+tab = "all"
+
+[editor.statusline]
+left = [
+  "mode",
+  "spacer",
+  "version-control",
+  "spacer",
+  "separator",
+  "file-name",
+  "file-modification-indicator"
+]
+right = [
+  "spinner",
+  "spacer",
+  "workspace-diagnostics",
+  "separator",
+  "spacer",
+  "diagnostics",
+  "position",
+  "file-encoding",
+  "file-line-ending",
+  "file-type"
+]
+separator = "▏"
+mode.normal = "NORMAL"
+mode.insert = "INSERT"
+mode.select = "SELECT"
+
+[editor.lsp]
+display-messages = true
+
+[keys.normal]
+C-s = ":w" # Maps Ctrl-s to the typable command :w which is an alias for :write (save file)
+C-o = ":open ~/.config/helix/config.toml" # Maps the Control-o to opening of the helix config file
+g = { a = "code_action" } # Maps `ga` to show possible code actions
+"ret" = ["open_below", "normal_mode"] # Maps the enter key to open_below then re-enter normal mode
+"tab" = ":bn"
+"S-tab" = ":bp"
