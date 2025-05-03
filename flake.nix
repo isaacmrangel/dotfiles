@@ -1,20 +1,15 @@
 # ~/dotfiles/flake.nix
 {
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-24.11"; # Or a specific release branch
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
 
     home-manager = {
       url = "github:nix-community/home-manager/release-24.11";
       inputs.nixpkgs.follows = "nixpkgs"; # Use the same nixpkgs
     };
-
-    # gauntlet = {
-    #   url = github:project-gauntlet/gauntlet/v18;
-    #   inputs.nixpkgs.follows = "nixpkgs"; # Use the same nixpkgs
-    # };
   };
 
-  outputs = { nixpkgs, home-manager, ... }:
+  outputs = { nixpkgs, home-manager, ... }@inputs:
     let
       lib = nixpkgs.lib;
       system = "x86_64-linux";

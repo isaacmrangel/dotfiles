@@ -6,17 +6,13 @@
         git
         htop
         helix
-        solaar
-        zed
-        spotify
-        obsidian
         monaspace
         ghostty
         zsh
         zinit
         starship
         mise
-        discord
+        gh
     ];
 
     username = "isaac";
@@ -64,10 +60,7 @@
     enable = true;
 
     enableZshIntegration = false;
-
-    settings = {
-      preset = "jetpack";
-    };
+    settings = pkgs.lib.importTOML ./starship.toml;
   };
 
   programs.git = {
@@ -78,14 +71,6 @@
       init.defaultBranch = "main";
     };
   };
-
-  # imports = [inputs.gauntlet.homeManagerModules.default];
-
-  # programs.gauntlet = {
-  #   enable = true;
-  #   service.enable = true;
-  #   config = {};
-  # };
 
   programs.home-manager.enable = true;
 }
