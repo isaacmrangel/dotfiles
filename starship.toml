@@ -29,6 +29,7 @@ $pijul_channel\
 $docker_context\
 $package\
 $c\
+$cpp\
 $cmake\
 $cobol\
 $daml\
