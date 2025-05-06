@@ -1,21 +1,20 @@
-{ lib, config, pkgs, inputs, ... }:
+{ lib, pkgs, user, ... }:
 
 {
   home = {
     packages = with pkgs; [
-        git
         htop
         helix
-        monaspace
-        ghostty
         zsh
         zinit
+        gnumake
         starship
         mise
         gh
+        monaspace
     ];
 
-    username = "isaac";
+    username = user;
     homeDirectory = "/home/isaac";
 
     stateVersion = "24.11";
@@ -23,6 +22,24 @@
     sessionVariables = {
       EDITOR = "hx";
     };
+
+    activation.make-zsh-default-shell = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      # if zsh is not the current shell
+        PATH="/usr/bin:/bin:$PATH"
+        ZSH_PATH="/home/${user}/.nix-profile/bin/zsh"
+        if [[ $(getent passwd ${user}) != *"$ZSH_PATH" ]]; then
+          echo "setting zsh as default shell (using chsh). password might be necessay."
+          echo "adding zsh to /etc/shells"
+          run echo "$ZSH_PATH" | sudo tee -a /etc/shells
+          echo "running chsh to make zsh the default shell"
+          run chsh -s $ZSH_PATH ${user}
+          echo "zsh is now set as default shell !"
+        fi
+    '';
+
+    activation.refresh-font-cache = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        fc-cache -f
+    '';
   };
 
   home.file.".config/ghostty/config" = {
@@ -44,7 +61,7 @@
   programs.zsh = {
     enable = true;
 
-    initExtra = ''
+    initContent = ''
       source ${./zsh_config/zinit_setup.zsh}
       source ${./zsh_config/plugins.zsh}
       source ${./zsh_config/misc.zsh}
