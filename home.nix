@@ -84,8 +84,8 @@
 
   programs.git = {
     enable = true;
-    userName = "Gadiel Rangel";
-    userEmail = "github@gadiel.dev";
+    userName = "Isaac Rangel";
+    userEmail = "machadogadiel@icloud.com";
     extraConfig = {
       init.defaultBranch = "main";
     };
