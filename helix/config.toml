@@ -11,7 +11,7 @@ line-number = "relative"
 true-color = true
 color-modes = true
 completion-trigger-len = 1
-auto-pairs = true
+auto-pairs = false
 
 [editor.soft-wrap]
 enable = true
@@ -42,7 +42,7 @@ right = [
   "file-line-ending",
   "file-type"
 ]
-separator = "▏"
+separator = " ▏"
 mode.normal = "NORMAL"
 mode.insert = "INSERT"
 mode.select = "SELECT"

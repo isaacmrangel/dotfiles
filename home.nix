@@ -7,6 +7,7 @@
         helix
         zsh
         zinit
+        zellij
         gnumake
         starship
         mise
@@ -27,6 +28,7 @@
       # if zsh is not the current shell
         PATH="/usr/bin:/bin:$PATH"
         ZSH_PATH="/home/${user}/.nix-profile/bin/zsh"
+        echo 'eval "$(zellij setup --generate-auto-start zsh)"' >> ~/.zshrc
         if [[ $(getent passwd ${user}) != *"$ZSH_PATH" ]]; then
           echo "setting zsh as default shell (using chsh). password might be necessay."
           echo "adding zsh to /etc/shells"
