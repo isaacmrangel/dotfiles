@@ -90,3 +90,8 @@ roots = ["package.json", ".git"]
 auto-format = true
 language-servers = ["volar"]
 formatter = { command = 'prettier', args = ["--parser", "vue"] }
+
+[[language]]
+name = "go"
+auto-format = true
+formatter = { command = "goimports" }
