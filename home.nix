@@ -24,10 +24,12 @@
       EDITOR = "hx";
     };
 
-   activation.refresh-font-cache = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        fc-cache -f
+    activation.refresh-font-cache = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      echo "Refreshing font cache..."
+      ${pkgs.fontconfig}/bin/fc-cache -f
     '';
-  };
+
+};
 
   home.file.".config/ghostty/config" = {
     source = ./ghostty/config;
