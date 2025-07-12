@@ -84,5 +84,20 @@
     };
   };
 
+  programs.zellij = {
+    enable = true;
+
+    settings = {
+      pane_frames = false;
+      theme = "kanagawa";
+    };
+
+    plugins = {
+      harpoon = pkgs.fetchurl {
+        url = "https://github.com/Nacho114/harpoon/releases/download/v0.1.0/harpoon.wasm";
+      };
+    };
+  };
+
   programs.home-manager.enable = true;
 }
