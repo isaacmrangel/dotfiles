@@ -61,7 +61,7 @@
   };
 
   home.file.".local/bin/zellij_sessionizer" = {
-    source = ./.local/bin/zellij_sessionizer;
+    source = ./zellij_sessionizer;
     executable = true;
   };
 
