@@ -1,4 +1,4 @@
-theme = "ized_onedark"
+theme = "kanabox_default"
 
 [editor]
 # Show currently open buffers, only when more than one exists.
@@ -12,6 +12,11 @@ true-color = true
 color-modes = true
 completion-trigger-len = 1
 auto-pairs = false
+end-of-line-diagnostics = "hint"
+
+[editor.lsp]
+auto-signature-help = true
+display-messages = true
 
 [editor.soft-wrap]
 enable = true
@@ -46,9 +51,6 @@ separator = " ▏"
 mode.normal = "NORMAL"
 mode.insert = "INSERT"
 mode.select = "SELECT"
-
-[editor.lsp]
-display-messages = true
 
 [keys.normal]
 C-s = ":w" # Maps Ctrl-s to the typable command :w which is an alias for :write (save file)

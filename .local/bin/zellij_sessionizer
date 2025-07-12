@@ -1,0 +1,65 @@
+# Default project directories (modify these to your needs)
+default_dirs=(
+    "$HOME/dev"
+    "$HOME/projects"
+    "$HOME/work"
+    # Add more directories here
+)
+
+# Function to search all configured directories
+search_project_dirs() {
+    local search_dirs=()
+    
+    # Check if environment variable is set
+    if [[ -n "$ZELLIJ_SESSIONIZER_DIRS" ]]; then
+        # Split the environment variable by colons into an array
+        IFS=':' read -ra search_dirs <<< "$ZELLIJ_SESSIONIZER_DIRS"
+    else
+        # Use default directories
+        search_dirs=("${default_dirs[@]}")
+    fi
+    
+    # Search all directories and combine results
+    for dir in "${search_dirs[@]}"; do
+        # Skip if directory doesn't exist
+        if [[ -d "$dir" ]]; then
+            # Using fd if available, otherwise fall back to find
+            if command -v fd &> /dev/null; then
+                fd . "$dir" --min-depth 1 --max-depth 2 --type d 2>/dev/null
+            else
+                find "$dir" -mindepth 1 -maxdepth 2 -type d 2>/dev/null
+            fi
+        fi
+    done
+}
+
+# Use an argument if passed
+if [[ $# -eq 1 ]]; then
+    selected_path=$1
+else
+    # If no argument provided, show all projects from all directories
+    selected_path=$(search_project_dirs | sort | uniq | fzf --prompt="Select project: " --height=40% --reverse)
+fi
+
+# If no directory was selected, exit the script
+if [[ -z $selected_path ]]; then
+    exit 0
+fi
+
+# Get the name of the selected directory, replacing "." with "_"
+session_name=$(basename "$selected_path" | tr . _)
+
+# We're outside of zellij, so lets create a new session or attach to an existing one
+if [[ -z $ZELLIJ ]]; then
+    cd "$selected_path"
+    
+    # -c will make zellij to either create a new session or to attach into an existing one
+    zellij attach "$session_name" -c
+    exit 0
+fi
+
+# We're inside zellij so we'll open a new pane and move into the selected directory
+zellij action new-pane
+
+# Write the cd command to the new pane
+zellij action write-chars "cd $selected_path" && zellij action write 10

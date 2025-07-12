@@ -60,6 +60,11 @@
     source = ./helix/languages.toml;
   };
 
+  home.file.".local/bin/zellij_sessionizer" = {
+    source = ./.local/bin/zellij_sessionizer;
+    executable = true;
+  };
+
   programs.zsh = {
     enable = true;
 
@@ -84,8 +89,8 @@
 
   programs.git = {
     enable = true;
-    userName = "Isaac Rangel";
-    userEmail = "machadogadiel@icloud.com";
+    userName = "Gadiel Rangel";
+    userEmail = "ig-grangel@totalwine.com";
     extraConfig = {
       init.defaultBranch = "main";
     };
