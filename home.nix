@@ -13,6 +13,7 @@
         mise
         gh
         monaspace
+        fontconfig
     ];
 
     username = user;
