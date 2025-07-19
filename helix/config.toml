@@ -1,4 +1,4 @@
-theme = "kanagawa_default"
+theme = "kanabox_default"
 
 [editor]
 # Show currently open buffers, only when more than one exists.

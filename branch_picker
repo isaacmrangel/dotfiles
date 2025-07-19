@@ -1,4 +1,4 @@
-!/bin/bash
+#!/usr/bin/env bash
 
 #
 # An interactive Git branch switcher using fzf
@@ -31,7 +31,7 @@ branches=$(git for-each-ref --sort=-committerdate refs/heads/ refs/remotes/ \
 # The preview command shows the last 10 commits of the selected branch.
 # We use sed to remove the 'remotes/origin/' prefix for the preview command.
 selected_branch=$(echo "$branches" | fzf --height 40% --layout=reverse \
-    --preview="git log --oneline --graph --date=short --pretty=format:'%C(auto)%h %s %C(green)(%cr) %C(bold blue)<%an>%d' -n 10 $(echo {} | sed 's/remotes\/origin\///')")
+    --preview="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --color=always -n 10 $(echo {} | sed 's/remotes\/origin\///')")
 
 # If a branch was selected, check it out.
 # The `sed` command is used to strip "remotes/origin/" from the branch name

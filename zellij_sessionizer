@@ -10,7 +10,6 @@ search_dirs=(
     "$HOME/projects"
     "$HOME/work"
     "$HOME/personal"
-    "$HOME/.config"
 )
 
 # Function to get session name from directory path
