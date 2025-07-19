@@ -1,4 +1,4 @@
-theme = "carbonfox"
+theme = "kanagawa_default"
 
 [editor]
 # Show currently open buffers, only when more than one exists.

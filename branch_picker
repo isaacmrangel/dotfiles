@@ -1,0 +1,42 @@
+!/bin/bash
+
+#
+# An interactive Git branch switcher using fzf
+#
+# This script lists all local and remote branches, pipes them to fzf for
+# interactive selection, and then checks out the selected branch.
+#
+# Features:
+# - Lists local and remote branches.
+# - Uses fzf for interactive fuzzy searching.
+# - Shows a preview of the latest commits for the selected branch.
+# - Sorts branches by the most recent commit date.
+# - Cleans up branch names, removing "remotes/origin/" and the "*" for the current branch.
+#
+
+# Ensure fzf is installed
+if ! command -v fzf &> /dev/null; then
+    echo "fzf could not be found, please install it first."
+    exit 1
+fi
+
+# Get all branches, sorted by most recent commit, and format them
+branches=$(git for-each-ref --sort=-committerdate refs/heads/ refs/remotes/ \
+    --format='%(refname:short)')
+
+# Use fzf to select a branch.
+# --height: sets the height of the fzf window
+# --layout=reverse: shows the list from the top
+# --preview: shows a command's output in a preview window
+# The preview command shows the last 10 commits of the selected branch.
+# We use sed to remove the 'remotes/origin/' prefix for the preview command.
+selected_branch=$(echo "$branches" | fzf --height 40% --layout=reverse \
+    --preview="git log --oneline --graph --date=short --pretty=format:'%C(auto)%h %s %C(green)(%cr) %C(bold blue)<%an>%d' -n 10 $(echo {} | sed 's/remotes\/origin\///')")
+
+# If a branch was selected, check it out.
+# The `sed` command is used to strip "remotes/origin/" from the branch name
+# in case a remote branch is selected, so we can check it out as a local branch.
+if [[ -n "$selected_branch" ]]; then
+    branch_to_checkout=$(echo "$selected_branch" | sed 's/remotes\/origin\///')
+    git checkout "$branch_to_checkout"
+fi

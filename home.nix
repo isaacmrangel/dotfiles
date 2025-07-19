@@ -42,6 +42,10 @@
       source = ./zellij_sessionizer;
       executable = true;
     };
+    ".local/bin/branch_picker" = {
+      source = ./branch_picker;
+      executable = true;
+    };
     ".config/zellij/layouts/default.kdl".source = ./zellij/layouts/default.kdl;
   };
 
