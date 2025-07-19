@@ -33,6 +33,7 @@ in
       gh
       monaspace
       fontconfig
+      nixfmt-rfc-style
     ];
 
     sessionVariables = {
