@@ -82,7 +82,7 @@ in
     git = {
       enable = true;
       userName = "Gadiel Rangel";
-      userEmail = "ig-grangel@totalwine.com";
+      userEmail = "machadogadiel@icloud.com";
       extraConfig = {
         init.defaultBranch = "main";
       };
