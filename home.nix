@@ -1,25 +1,11 @@
 { lib, pkgs, user, ... }:
 
-let
-  # Fetch the harpoon plugin with a known SHA256 hash for purity
-  harpoon-plugin = pkgs.fetchurl {
-    url = "https://github.com/Nacho114/harpoon/releases/download/v0.1.0/harpoon.wasm";
-    sha256 = "00ln03gjpf6xdfq1d3z84pcvmyrk1n1ddi1nkfxsmnqxldyzinfa";
-  };
-
-  # Read the layout file and substitute the plugin path
-  zellij-layout = pkgs.runCommand "default.kdl" {} ''
-    substitute ${./zellij/layouts/default.kdl} $out \
-      --replace "__PLUGIN_PATH__" "${harpoon-plugin}"
-  '';
-
-in
 {
   # Core home-manager configuration
   home = {
     username = user;
     homeDirectory = "/home/${user}";
-    stateVersion = "24.11";
+    stateVersion = "25.05";
 
     packages = with pkgs; [
       htop
@@ -56,8 +42,7 @@ in
       source = ./zellij_sessionizer;
       executable = true;
     };
-    # Link the processed Zellij layout
-    ".config/zellij/layouts/default.kdl".source = zellij-layout;
+    ".config/zellij/layouts/default.kdl".source = ./zellij/layouts/default.kdl;
   };
 
   programs = {
@@ -93,7 +78,7 @@ in
       enable = true;
       settings = {
         pane_frames = false;
-        theme = "kanagawa";
+        theme = "carbon";
         # Use the layout file we just linked
         default_layout = "default";
       };

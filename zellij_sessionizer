@@ -1,65 +1,160 @@
-# Default project directories (modify these to your needs)
-default_dirs=(
-    "$HOME/dev"
+#!/usr/bin/env bash
+
+# Zellij Sessionizer - A zellij equivalent to theprimeagen's tmux sessionizer
+# Usage: zellij_sessionizer [directory]
+
+set -euo pipefail
+
+# Default directories to search for projects
+search_dirs=(
     "$HOME/projects"
     "$HOME/work"
-    # Add more directories here
+    "$HOME/personal"
+    "$HOME/.config"
 )
 
-# Function to search all configured directories
-search_project_dirs() {
-    local search_dirs=()
-    
-    # Check if environment variable is set
-    if [[ -n "$ZELLIJ_SESSIONIZER_DIRS" ]]; then
-        # Split the environment variable by colons into an array
-        IFS=':' read -ra search_dirs <<< "$ZELLIJ_SESSIONIZER_DIRS"
-    else
-        # Use default directories
-        search_dirs=("${default_dirs[@]}")
-    fi
-    
-    # Search all directories and combine results
-    for dir in "${search_dirs[@]}"; do
-        # Skip if directory doesn't exist
-        if [[ -d "$dir" ]]; then
-            # Using fd if available, otherwise fall back to find
-            if command -v fd &> /dev/null; then
-                fd . "$dir" --min-depth 1 --max-depth 2 --type d 2>/dev/null
-            else
-                find "$dir" -mindepth 1 -maxdepth 2 -type d 2>/dev/null
-            fi
-        fi
-    done
+# Function to get session name from directory path
+get_session_name() {
+    local dir="$1"
+    basename "$dir" | tr '.' '_'
 }
 
-# Use an argument if passed
-if [[ $# -eq 1 ]]; then
-    selected_path=$1
-else
-    # If no argument provided, show all projects from all directories
-    selected_path=$(search_project_dirs | sort | uniq | fzf --prompt="Select project: " --height=40% --reverse)
-fi
+# Function to check if session exists
+session_exists() {
+    local session_name="$1"
+    # Extract session names from zellij list-sessions output, removing ANSI colors
+    zellij list-sessions 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | awk '{print $1}' | grep -q "^$session_name$"
+}
 
-# If no directory was selected, exit the script
-if [[ -z $selected_path ]]; then
-    exit 0
-fi
-
-# Get the name of the selected directory, replacing "." with "_"
-session_name=$(basename "$selected_path" | tr . _)
-
-# We're outside of zellij, so lets create a new session or attach to an existing one
-if [[ -z $ZELLIJ ]]; then
-    cd "$selected_path"
+# Function to select directory using fzf/sk
+select_directory() {
+    local selected_dir
     
-    # -c will make zellij to either create a new session or to attach into an existing one
-    zellij attach "$session_name" -c
-    exit 0
-fi
+    # Check if we have fzf or sk
+    if command -v fzf >/dev/null 2>&1; then
+        selected_dir=$(find "${search_dirs[@]}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | fzf)
+    elif command -v sk >/dev/null 2>&1; then
+        selected_dir=$(find "${search_dirs[@]}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sk)
+    else
+        echo "Error: fzf or sk is required for interactive selection" >&2
+        exit 1
+    fi
+    
+    echo "$selected_dir"
+}
 
-# We're inside zellij so we'll open a new pane and move into the selected directory
-zellij action new-pane
+# Function to show help
+show_help() {
+    cat << EOF
+Zellij Sessionizer - A zellij equivalent to theprimeagen's tmux sessionizer
 
-# Write the cd command to the new pane
-zellij action write-chars "cd $selected_path" && zellij action write 10
+Usage: zellij_sessionizer [directory|options]
+
+Options:
+    -h, --help    Show this help message
+    -n, --dry-run Test mode - show what would be done without executing
+    
+Arguments:
+    directory     Optional directory path to create session for
+                  If not provided, uses interactive selection with fzf/sk
+
+Default search directories:
+    ~/projects
+    ~/work  
+    ~/personal
+    ~/.config
+
+Examples:
+    zellij_sessionizer                    # Interactive selection
+    zellij_sessionizer ~/my/project       # Direct session for specific directory
+
+Requirements:
+    - zellij
+    - fzf or sk (for interactive selection)
+EOF
+}
+
+# Main function
+main() {
+    local selected_dir
+    local session_name
+    local dry_run=false
+    
+    # Handle flags
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            -n|--dry-run)
+                dry_run=true
+                shift
+                ;;
+            -*)
+                echo "Unknown option: $1" >&2
+                echo "Use --help for usage information" >&2
+                exit 1
+                ;;
+            *)
+                # This is the directory argument
+                break
+                ;;
+        esac
+    done
+    
+    # If directory is provided as argument, use it
+    if [[ $# -eq 1 ]]; then
+        selected_dir="$1"
+        if [[ ! -d "$selected_dir" ]]; then
+            echo "Error: Directory '$selected_dir' does not exist" >&2
+            echo "Use --help for usage information" >&2
+            exit 1
+        fi
+    else
+        # Interactive selection
+        selected_dir=$(select_directory)
+        if [[ -z "$selected_dir" ]]; then
+            echo "No directory selected" >&2
+            exit 1
+        fi
+    fi
+    
+    session_name=$(get_session_name "$selected_dir")
+    
+    # Change to the selected directory
+    cd "$selected_dir"
+    
+    # Check if we're already in a zellij session
+    if [[ -n "${ZELLIJ:-}" ]]; then
+        # We're inside zellij, create a new session or switch to existing one
+        if session_exists "$session_name"; then
+            echo "Switching to existing session: $session_name"
+            if [[ "$dry_run" == "false" ]]; then
+                zellij action switch-session "$session_name"
+            fi
+        else
+            echo "Creating new session: $session_name in $selected_dir"
+            if [[ "$dry_run" == "false" ]]; then
+                # Create new session in background, then switch to it
+                zellij --session "$session_name" --detached
+                zellij action switch-session "$session_name"
+            fi
+        fi
+    else
+        # We're not in zellij, attach or create session
+        if session_exists "$session_name"; then
+            echo "Attaching to existing session: $session_name"
+            if [[ "$dry_run" == "false" ]]; then
+                zellij attach "$session_name"
+            fi
+        else
+            echo "Creating new session: $session_name in $selected_dir"
+            if [[ "$dry_run" == "false" ]]; then
+                zellij --session "$session_name"
+            fi
+        fi
+    fi
+}
+
+main "$@"
